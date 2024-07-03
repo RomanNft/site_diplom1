@@ -1,21 +1,39 @@
-version: '3'
+version: '3.8'
+
 services:
-  frontend:
-    image: your-dockerhub-username/frontend:latest
-    ports:
-      - "80:80"
-  backend:
-    image: your-dockerhub-username/backend:latest
+  jenkins:
+    image: jenkins/jenkins:lts
     ports:
       - "8080:8080"
-    environment:
-      - DATABASE_URL=mysql://db_user:db_pass@db_host:3306/db_name
-  database:
-    image: your-dockerhub-username/database:latest
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins-net
+
+  frontend:
+    image: roman2447/frontend:latest
     ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=root_pass
-      - MYSQL_DATABASE=db_name
-      - MYSQL_USER=db_user
-      - MYSQL_PASSWORD=db_pass
+      - "3000:3000"
+    networks:
+      - jenkins-net
+
+  backend:
+    image: roman2447/backend:latest
+    ports:
+      - "5000:5000"
+    networks:
+      - jenkins-net
+
+  database:
+    image: roman2447/database:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - jenkins-net
+
+volumes:
+  jenkins_home:
+
+networks:
+  jenkins-net:
