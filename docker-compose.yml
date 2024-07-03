@@ -12,21 +12,21 @@ services:
       - jenkins-net
 
   frontend:
-    image: roman2447/frontend:latest
+    image: your-dockerhub-username/frontend:latest
     ports:
       - "3000:3000"
     networks:
       - jenkins-net
 
   backend:
-    image: roman2447/backend:latest
+    image: your-dockerhub-username/backend:latest
     ports:
       - "5000:5000"
     networks:
       - jenkins-net
 
   database:
-    image: roman2447/database:latest
+    image: your-dockerhub-username/database:latest
     ports:
       - "27017:27017"
     networks:
