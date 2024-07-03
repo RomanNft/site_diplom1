@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Pull Latest Code') {
             steps {
-                git 'https://github.com/RomanNft/site_diplom1.git'
+                git 'https://github.com/RomanNft/site_diplom1.git' // Замініть на ваш репозиторій FrontEnd
             }
         }
         stage('Build Docker Image') {
@@ -29,6 +29,12 @@ pipeline {
                     dockerComposeBuild()
                     dockerComposeUp()
                 }
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'npm install' // Інсталяція залежностей
+                sh 'npm test' // Виконання тестів (замініть на ваші тестові команди)
             }
         }
     }
