@@ -4,13 +4,13 @@ pipeline {
     stages {
         stage('Pull Latest Code') {
             steps {
-                git 'https://github.com/RomanNft/site_diplom1.git'
+                git branch: 'master', url: 'https://github.com/RomanNft/site_diplom1.git'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("roman2447/backend:${env.BUILD_NUMBER}")
+                    dockerImage = docker.build("roman2447/frontend:${env.BUILD_NUMBER}")
                 }
             }
         }
