@@ -1,39 +1,15 @@
-version: '3.8'
+version: '3.7'
 
 services:
-  jenkins:
-    image: jenkins/jenkins:lts
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - jenkins_home:/var/jenkins_home
-    networks:
-      - jenkins-net
-
   frontend:
-    image: your-dockerhub-username/frontend:latest
+    image: roman2447/frontend:latest
     ports:
       - "3000:3000"
-    networks:
-      - jenkins-net
 
   backend:
-    image: your-dockerhub-username/backend:latest
+    image: roman2447/backend:latest
     ports:
       - "5000:5000"
-    networks:
-      - jenkins-net
-
-  database:
-    image: your-dockerhub-username/database:latest
-    ports:
-      - "27017:27017"
-    networks:
-      - jenkins-net
 
 volumes:
   jenkins_home:
-
-networks:
-  jenkins-net:
