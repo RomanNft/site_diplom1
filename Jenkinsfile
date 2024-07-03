@@ -1,41 +1,15 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-    }
-
     stages {
-        stage('Clone repository') {
-            steps {
-                git url: 'https://github.com/RomanNft/site_diplom1.git', branch: 'master'
-            }
-        }
-        stage('Build Frontend') {
+        stage('Build and Run Docker') {
             steps {
                 script {
-                    docker.build('frontend', 'frontend').push("${DOCKER_HUB_CREDENTIALS_USR}/frontend:latest")
+                    def dockerImage = docker.image('alpine')
+                    dockerImage.pull()  // Опціонально: завантажуємо образ, якщо він не завантажений раніше
+                    dockerImage.run('-v /:/mnt/host --rm -i alpine echo "Hello from Docker"')
                 }
             }
-        }
-        stage('Build Backend') {
-            steps {
-                script {
-                    docker.build('backend', 'backend').push("${DOCKER_HUB_CREDENTIALS_USR}/backend:latest")
-                }
-            }
-        }
-        stage('Build Database') {
-            steps {
-                script {
-                    docker.build('database', 'database').push("${DOCKER_HUB_CREDENTIALS_USR}/database:latest")
-                }
-            }
-        }
-    }
-    post {
-        always {
-            cleanWs()
         }
     }
 }
