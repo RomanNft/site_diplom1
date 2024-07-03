@@ -11,7 +11,7 @@ pipeline {
             steps {
                 echo 'Building the backend...'
                 script {
-                    docker.build("roman2447/backend:${DOCKER_IMAGE_TAG}")
+                    docker.build("roman2447/backend:${DOCKER_IMAGE_TAG}", "-f ./BackEnd/Amazon-clone/Dockerfile .")
                 }
             }
         }
