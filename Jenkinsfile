@@ -2,49 +2,47 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         JD_IMAGE = "roman2447/backend:latest"
-        DOCKER_HUB_CREDENTIALS = credentials('jenkins-docker-hub-creds') // Jenkins credentials ID
-        DOCKER_IMAGE_TAG = 'latest'
     }
 
     stages {
         stage('Checkout SCM') {
             steps {
-                checkout scm
+                git 'https://github.com/RomanNft/site_diplom1'
             }
         }
 
-        stage('Build') {
+        stage('Build Backend') {
             steps {
-                echo 'Building the backend...'
                 script {
-                    docker.build(JD_IMAGE, "-f ./BackEnd/Amazon-clone/Dockerfile .")
+                    echo "Building the backend..."
+                    sh 'docker build -t $JD_IMAGE -f ./BackEnd/Amazon-clone/Dockerfile .'
                 }
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                // Add your test commands here, e.g., docker-compose, npm test, etc.
+                echo "Running tests..."
+                // Add your test steps here
             }
         }
 
-        stage('Push') {
+        stage('Push Backend') {
             steps {
-                echo 'Pushing the backend image to Docker Hub...'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        docker.push(JD_IMAGE)
-                    }
+                    echo "Pushing the Docker image..."
+                    sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
+                    sh 'docker push $JD_IMAGE'
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying the backend...'
-                // Add deployment steps here, e.g., docker-compose up -d, kubectl apply, etc.
+                echo "Deploying the application..."
+                // Add your deployment steps here
             }
         }
     }
