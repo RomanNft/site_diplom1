@@ -2,16 +2,23 @@ pipeline {
     agent any
 
     environment {
+        JD_IMAGE = "roman2447/backend:latest"
         DOCKER_HUB_CREDENTIALS = credentials('jenkins-docker-hub-creds') // Jenkins credentials ID
         DOCKER_IMAGE_TAG = 'latest'
     }
 
     stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building the backend...'
                 script {
-                    docker.build("roman2447/backend:${DOCKER_IMAGE_TAG}", "-f ./BackEnd/Amazon-clone/Dockerfile .")
+                    docker.build(JD_IMAGE, "-f ./BackEnd/Amazon-clone/Dockerfile .")
                 }
             }
         }
@@ -28,7 +35,7 @@ pipeline {
                 echo 'Pushing the backend image to Docker Hub...'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        docker.push("roman2447/backend:${DOCKER_IMAGE_TAG}")
+                        docker.push(JD_IMAGE)
                     }
                 }
             }
