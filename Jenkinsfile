@@ -1,31 +1,39 @@
 pipeline {
     agent any
-
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        DOCKERHUB_REPO = 'roman2447'
+    }
     stages {
-        stage('Підготовка') {
+        stage('Build Frontend') {
             steps {
                 script {
-                    // Оновлення списків пакетів
-                    sh 'apt-get update'
-
-                    // Встановлення Docker
-                    sh 'apt-get install -y docker.io'
-
-                    // Перевірка версії Docker
-                    sh 'docker --version'
+                    sh 'docker build -t $DOCKERHUB_REPO/frontend:latest -f frontend/Dockerfile .'
                 }
             }
         }
-
-        stage('Збірка та запуск Docker') {
+        stage('Build Backend') {
             steps {
                 script {
-                    // Перевірка доступності Docker після встановлення
-                    sh 'which docker'
-
-                    // Виконання команди pull та запуск контейнера
-                    sh 'docker pull alpine'
-                    sh 'docker run -v /:/mnt/host --rm -i alpine echo "Hello from Docker"'
+                    sh 'docker build -t $DOCKERHUB_REPO/backend:latest -f backend/Dockerfile .'
+                }
+            }
+        }
+        stage('Build Database') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKERHUB_REPO/database:latest -f database/Dockerfile .'
+                }
+            }
+        }
+        stage('Push Images') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
+                        sh 'docker push $DOCKERHUB_REPO/frontend:latest'
+                        sh 'docker push $DOCKERHUB_REPO/backend:latest'
+                        sh 'docker push $DOCKERHUB_REPO/database:latest'
+                    }
                 }
             }
         }
