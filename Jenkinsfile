@@ -1,41 +1,38 @@
 pipeline {
     agent any
     environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'roman2447'
-        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials-id'
     }
     stages {
-        stage('Checkout SCM') {
-            steps {
-                git url: 'https://github.com/RomanNft/site_diplom1.git', branch: 'master'
-            }
-        }
         stage('Build Frontend') {
             steps {
                 script {
-                    dockerImage = docker.build("$DOCKERHUB_REPO/frontend:latest", "frontend/Dockerfile")
+                    sh "docker build -t $DOCKERHUB_REPO/frontend:latest -f frontend/Dockerfile frontend/"
                 }
             }
         }
         stage('Build Backend') {
             steps {
                 script {
-                    dockerImage = docker.build("$DOCKERHUB_REPO/backend:latest", "backend/Dockerfile")
+                    sh "docker build -t $DOCKERHUB_REPO/backend:latest -f backend/Dockerfile backend/"
                 }
             }
         }
         stage('Build Database') {
             steps {
                 script {
-                    dockerImage = docker.build("$DOCKERHUB_REPO/database:latest", "database/Dockerfile")
+                    sh "docker build -t $DOCKERHUB_REPO/database:latest -f database/Dockerfile database/"
                 }
             }
         }
         stage('Push Images') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "$DOCKERHUB_CREDENTIALS") {
-                        dockerImage.push()
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
+                        sh "docker push $DOCKERHUB_REPO/frontend:latest"
+                        sh "docker push $DOCKERHUB_REPO/backend:latest"
+                        sh "docker push $DOCKERHUB_REPO/database:latest"
                     }
                 }
             }
