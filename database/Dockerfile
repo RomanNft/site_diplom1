@@ -1,5 +1,6 @@
-FROM mysql:5.7
-ENV MYSQL_ROOT_PASSWORD root
-ENV MYSQL_DATABASE mydatabase
-EXPOSE 3306
-
+FROM postgres:13
+ENV POSTGRES_USER=myuser
+ENV POSTGRES_PASSWORD=mypassword
+ENV POSTGRES_DB=mydatabase
+COPY init.sql /docker-entrypoint-initdb.d/
+EXPOSE 5432
