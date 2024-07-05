@@ -1,8 +1,8 @@
 FROM node:14-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY FrontEnd/my-app/package*.json ./
 RUN npm install
-COPY . .
+COPY FrontEnd/my-app ./
 RUN npm run build
 EXPOSE 3000
 CMD ["npm", "start"]
