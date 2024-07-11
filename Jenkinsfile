@@ -44,10 +44,8 @@ pipeline {
                 script {
                     // Create final Docker image combining all components
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-                        def finalImage = docker.build(finalImageTag)
-                        finalImage.withRun('-d -p 8080:80') {
-                            // Initialization or setup commands if needed
-                        }
+                        // Build the final image from the root directory
+                        def finalImage = docker.build(finalImageTag, '.')
                         finalImage.push()
                     }
                 }
