@@ -1,8 +1,8 @@
-FROM node:14-alpine
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
+RUN npm install -g npm
 RUN npm install
-COPY ./my-app .   # Adjusted path to correctly copy from 'my-app' directory
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
+COPY . .
+EXPOSE 80
+CMD ["npm","start","--","--host","http://0.0.0.0"]
