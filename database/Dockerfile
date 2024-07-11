@@ -1,6 +1,8 @@
-FROM postgres:13
-ENV POSTGRES_USER=myuser
-ENV POSTGRES_PASSWORD=mypassword
-ENV POSTGRES_DB=mydatabase
-COPY init.sql /docker-entrypoint-initdb.d/
-EXPOSE 5432
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install -g npm
+RUN npm install
+COPY . .
+EXPOSE 80
+CMD ["npm","start","--","--host","http://0.0.0.0"]
