@@ -2,20 +2,20 @@ pipeline {
     agent any
 
     environment {
+        // Define Docker credentials
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        // Define Docker registry URL
+        DOCKER_REGISTRY_URL = 'docker.io'  // or your Docker registry URL
+        // Define image names
+        BACKEND_IMAGE = 'roman2447/site-diplom1-backend'
+        FRONTEND_IMAGE = 'roman2447/site-diplom1-frontend'
+        DATABASE_IMAGE = 'roman2447/site-diplom1-database'
     }
 
     stages {
-        stage('Build Frontend') {
+        stage('Checkout') {
             steps {
-                dir('FrontEnd/my-app') {
-                    script {
-                        def frontendImage = docker.build('frontend-image', '.')
-                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-                            frontendImage.push()
-                        }
-                    }
-                }
+                checkout scm
             }
         }
 
@@ -23,10 +23,19 @@ pipeline {
             steps {
                 dir('BackEnd/Amazon-clone') {
                     script {
-                        def backendImage = docker.build('backend-image', '.')
-                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-                            backendImage.push()
-                        }
+                        // Build backend Docker image
+                        docker.build(BACKEND_IMAGE)
+                    }
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('FrontEnd/my-app') {
+                    script {
+                        // Build frontend Docker image
+                        docker.build(FRONTEND_IMAGE)
                     }
                 }
             }
@@ -34,12 +43,23 @@ pipeline {
 
         stage('Build Database') {
             steps {
-                dir('Database') {
+                dir('BackEnd') {
                     script {
-                        def databaseImage = docker.build('database-image', '.')
-                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-                            databaseImage.push()
-                        }
+                        // Build database Docker image
+                        docker.build(DATABASE_IMAGE, '-f Dockerfile')
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                // Push built Docker images to Docker Hub
+                script {
+                    docker.withRegistry(DOCKER_REGISTRY_URL, DOCKERHUB_CREDENTIALS) {
+                        docker.image(BACKEND_IMAGE).push()
+                        docker.image(FRONTEND_IMAGE).push()
+                        docker.image(DATABASE_IMAGE).push()
                     }
                 }
             }
