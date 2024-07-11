@@ -5,7 +5,7 @@ pipeline {
         // Define Docker credentials
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         // Define Docker registry URL
-        DOCKER_REGISTRY_URL = 'docker.io'  // or your Docker registry URL
+        DOCKER_REGISTRY_URL = 'docker.io'
         // Define image names
         BACKEND_IMAGE = 'roman2447/site-diplom1-backend'
         FRONTEND_IMAGE = 'roman2447/site-diplom1-frontend'
@@ -46,7 +46,7 @@ pipeline {
                 dir('site_diplom1') {
                     script {
                         // Build database Docker image
-                        docker.build(DATABASE_IMAGE, '.')
+                        docker.build(DATABASE_IMAGE, './Dockerfile')
                     }
                 }
             }
