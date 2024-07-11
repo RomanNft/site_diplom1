@@ -1,54 +1,45 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+    }
+
     stages {
-        stage('Build BackEnd') {
-            steps {
-                dir('BackEnd/Amazon-clone') {
-                    script {
-                        def backendImage = docker.build('backend-image', '-f Dockerfile .')
-                        backendImage.inside {
-                            sh 'dotnet restore ShopApi/ShopApi.csproj'
-                            sh 'dotnet build ShopApi/ShopApi.csproj -c Release -o /app/build'
-                        }
-                    }
-                }
-            }
-        }
-        
-        stage('Build FrontEnd') {
+        stage('Build Frontend') {
             steps {
                 dir('FrontEnd/my-app') {
                     script {
-                        def frontendImage = docker.build('frontend-image', '-f Dockerfile .')
-                        frontendImage.inside {
-                            sh 'npm install'
-                            sh 'npm run build'
+                        def frontendImage = docker.build('frontend-image', '.')
+                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+                            frontendImage.push()
                         }
                     }
                 }
             }
         }
-        
-        stage('Run SQL Server') {
+
+        stage('Build Backend') {
             steps {
-                script {
-                    docker.image('mcr.microsoft.com/mssql/server:latest').withRun('-e ACCEPT_EULA=Y -e SA_PASSWORD=YourStrong@Passw0rd -p 1433:1433') { c ->
-                        sleep 30 // wait for SQL Server to start
+                dir('BackEnd/Amazon-clone') {
+                    script {
+                        def backendImage = docker.build('backend-image', '.')
+                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+                            backendImage.push()
+                        }
                     }
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Build Database') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-                        // Push backend image to Docker Hub
-                        docker.image('backend-image').push()
-
-                        // Push frontend image to Docker Hub
-                        docker.image('frontend-image').push()
+                dir('Database') {
+                    script {
+                        def databaseImage = docker.build('database-image', '.')
+                        docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+                            databaseImage.push()
+                        }
                     }
                 }
             }
