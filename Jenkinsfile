@@ -1,13 +1,19 @@
 pipeline {
     agent any
     
+    environment {
+        backendImage = ''
+        frontendImage = ''
+        databaseImage = ''
+    }
+    
     stages {
         stage('Build Backend') {
             steps {
                 dir('BackEnd/Amazon-clone') {
                     script {
                         // Build backend Docker image
-                        docker.build('roman2447/site-diplom1-backend')
+                        backendImage = docker.build('roman2447/site-diplom1-backend')
                     }
                 }
             }
@@ -18,7 +24,7 @@ pipeline {
                 dir('FrontEnd/my-app') {
                     script {
                         // Build frontend Docker image
-                        docker.build('roman2447/site-diplom1-frontend')
+                        frontendImage = docker.build('roman2447/site-diplom1-frontend')
                     }
                 }
             }
@@ -29,7 +35,7 @@ pipeline {
                 dir('BackEnd/Amazon-clone') {
                     script {
                         // Build database Docker image from Dockerfile-db
-                        docker.build('roman2447/site-diplom1-database', '-f Dockerfile-db .')
+                        databaseImage = docker.build('roman2447/site-diplom1-database', '-f Dockerfile-db .')
                     }
                 }
             }
@@ -40,7 +46,9 @@ pipeline {
                 script {
                     // Push all built Docker images to Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-                        dockerImage.push()
+                        backendImage.push()
+                        frontendImage.push()
+                        databaseImage.push()
                     }
                 }
             }
