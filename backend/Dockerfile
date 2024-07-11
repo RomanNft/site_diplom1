@@ -1,28 +1,19 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["BackEnd/Amazon-clone/ShopApi/ShopApi.csproj", "BackEnd/Amazon-clone/ShopApi/"]
+RUN dotnet restore "BackEnd/Amazon-clone/ShopApi/ShopApi.csproj"
 COPY . .
-RUN dotnet restore "ShopApi/ShopApi.csproj"
+WORKDIR "/src/BackEnd/Amazon-clone/ShopApi"
+RUN dotnet build "ShopApi.csproj" -c Release -o /app/build
 
-
-# Install the dotnet-ef tool locally
-#RUN dotnet tool install -g dotnet-ef
-RUN dotnet tool install -g dotnet-ef --version 6.0
-
-ENV PATH $PATH:/root/.dotnet/tools
-RUN dotnet-ef database update --startup-project "ShopApi" --project "DAL/DAL.csproj"
-# Publish the application
-RUN dotnet build "ShopApi/ShopApi.csproj" -c Release -o /app/build
 FROM build AS publish
+RUN dotnet publish "ShopApi.csproj" -c Release -o /app/publish
 
-RUN dotnet publish "ShopApi/ShopApi.csproj" -c Release -o /app/publish
-COPY ShopApi/images /app/publish/images
-COPY ShopApi/comment_images /app/publish/comment_images
-COPY ShopApi/company_images /app/publish/company_images
-COPY ShopApi/music_images /app/publish/music_images
-# Build the final image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-EXPOSE 5034
-ENTRYPOINT ["dotnet", "ShopApi.dll","--urls","http://0.0.0.0:5034"]
+ENTRYPOINT ["dotnet", "ShopApi.dll"]
