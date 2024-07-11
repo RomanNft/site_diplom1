@@ -43,10 +43,10 @@ pipeline {
 
         stage('Build Database') {
             steps {
-                dir('BackEnd') {
+                dir('site_diplom1') {
                     script {
                         // Build database Docker image
-                        docker.build(DATABASE_IMAGE, '-f Dockerfile')
+                        docker.build(DATABASE_IMAGE, '.')
                     }
                 }
             }
