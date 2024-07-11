@@ -2,9 +2,7 @@ pipeline {
     agent any
     
     environment {
-        backendImage = ''
-        frontendImage = ''
-        databaseImage = ''
+        finalImageTag = 'roman2447/site-diplom1-final'
     }
     
     stages {
@@ -13,7 +11,7 @@ pipeline {
                 dir('BackEnd/Amazon-clone') {
                     script {
                         // Build backend Docker image
-                        backendImage = docker.build('roman2447/site-diplom1-backend')
+                        docker.build('roman2447/site-diplom1-backend')
                     }
                 }
             }
@@ -24,7 +22,7 @@ pipeline {
                 dir('FrontEnd/my-app') {
                     script {
                         // Build frontend Docker image
-                        frontendImage = docker.build('roman2447/site-diplom1-frontend')
+                        docker.build('roman2447/site-diplom1-frontend')
                     }
                 }
             }
@@ -35,20 +33,22 @@ pipeline {
                 dir('BackEnd/Amazon-clone') {
                     script {
                         // Build database Docker image from Dockerfile-db
-                        databaseImage = docker.build('roman2447/site-diplom1-database', '-f Dockerfile-db .')
+                        docker.build('roman2447/site-diplom1-database', '-f Dockerfile-db .')
                     }
                 }
             }
         }
         
-        stage('Push Docker Images') {
+        stage('Create and Push Final Docker Image') {
             steps {
                 script {
-                    // Push all built Docker images to Docker Hub
+                    // Create final Docker image combining all components
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-                        backendImage.push()
-                        frontendImage.push()
-                        databaseImage.push()
+                        def finalImage = docker.build(finalImageTag)
+                        finalImage.withRun('-d -p 8080:80') {
+                            // Initialization or setup commands if needed
+                        }
+                        finalImage.push()
                     }
                 }
             }
