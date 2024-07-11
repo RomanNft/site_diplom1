@@ -26,10 +26,10 @@ pipeline {
         
         stage('Build Database') {
             steps {
-                dir('site_diplom1') {
+                dir('BackEnd/Amazon-clone') {
                     script {
-                        // Build database Docker image
-                        docker.build('roman2447/site-diplom1-database', './Dockerfile')
+                        // Build database Docker image from Dockerfile-db
+                        docker.build('roman2447/site-diplom1-database', '-f Dockerfile-db .')
                     }
                 }
             }
